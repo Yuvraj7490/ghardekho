@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Edit Room | Ghar Dekho</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            background: #f4f7fb;
+            font-family: Arial, sans-serif;
+            color: #222;
+        }
+
+        header {
+            background: #173b70;
+            color: white;
+            padding: 20px 6%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        header h1 {
+            margin: 0;
+        }
+
+        header a {
+            color: white;
+            text-decoration: none;
+            margin-left: 12px;
+        }
+
+        .container {
+            max-width: 850px;
+            width: 92%;
+            margin: 35px auto;
+        }
+
+        .panel {
+            background: white;
+            padding: 28px;
+            border-radius: 12px;
+            box-shadow: 0 3px 12px #00000010;
+        }
+
+        input, select, textarea, button {
+            font: inherit;
+        }
+
+        input, select, textarea {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            margin-top: 7px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+        }
+
+        textarea {
+            min-height: 110px;
+            resize: vertical;
+        }
+
+        .field {
+            margin-bottom: 18px;
+        }
+
+        .amenities {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 14px;
+        }
+
+        .amenities label {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .amenities input {
+            width: auto;
+            margin: 0;
+        }
+
+        button, .btn {
+            display: inline-block;
+            border: none;
+            padding: 12px 18px;
+            border-radius: 6px;
+            cursor: pointer;
+            text-decoration: none;
+            background: #1769aa;
+            color: white;
+        }
+
+        .cancel {
+            background: #64748b;
+        }
+
+        .current-photo {
+            max-width: 260px;
+            width: 100%;
+            border-radius: 8px;
+            display: block;
+            margin-top: 10px;
+        }
+
+        .message {
+            padding: 12px;
+            margin-bottom: 12px;
+            background: #e1f7e8;
+            border-radius: 6px;
+        }
+
+        @media (max-width: 600px) {
+            .panel {
+                padding: 18px;
+            }
+
+            header {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+        }
+    </style>
+
+</head>
+
+<body>
+
+<header>
+
+    <h1>🏠 Ghar Dekho</h1>
+
+    <nav>
+        <a href="{{ url_for('owner_dashboard') }}">
+            Dashboard
+        </a>
+
+        <a href="{{ url_for('index') }}">
+            Home
+        </a>
+    </nav>
+
+</header>
+
+<main class="container">
+
+    <section class="panel">
+
+        <h2>✏️ Edit Room Listing</h2>
+
+        <p>Update your property information below.</p>
+
+        {% with messages = get_flashed_messages() %}
+            {% for message in messages %}
+                <div class="message">{{ message }}</div>
+            {% endfor %}
+        {% endwith %}
+
+        <form
+            method="POST"
+            action="{{ url_for('edit_room', room_id=room.id) }}"
+            enctype="multipart/form-data"
+        >
+
+            <div class="field">
+
+                <label>Room Title</label>
+
+                <input
+                    type="text"
+                    name="title"
+                    value="{{ room.title }}"
+                    maxlength="150"
+                    required
+                >
+
+            </div>
+
+
+            <div class="field">
+
+                <label>Room Type</label>
+
+                <select name="room_type" required>
+
+                    {% for type in allowed_room_types %}
+
+                        <option
+                            value="{{ type }}"
+                            {% if room.room_type == type %}
+                                selected
+                            {% endif %}
+                        >
+                            {{ type }}
+                        </option>
+
+                    {% endfor %}
+
+                </select>
+
+            </div>
+
+
+            <div class="field">
+
+                <label>Location / City</label>
+
+                <input
+                    type="text"
+                    name="location"
+                    value="{{ room.location }}"
+                    maxlength="150"
+                    required
+                >
+
+            </div>
+
+
+            <div class="field">
+
+                <label>Full Address</label>
+
+                <textarea
+                    name="address"
+                    maxlength="500"
+                    required
+                >{{ room.address }}</textarea>
+
+            </div>
+
+
+            <div class="field">
+
+                <label>Monthly Rent (₹)</label>
+
+                <input
+                    type="number"
+                    name="rent"
+                    value="{{ room.rent }}"
+                    min="1"
+                    required
+                >
+
+            </div>
+
+
+            <div class="field">
+
+                <label>Security Deposit (₹)</label>
+
+                <input
+                    type="number"
+                    name="deposit"
+                    value="{{ room.deposit }}"
+                    min="0"
+                    required
+                >
+
+            </div>
+
+
+            <div class="field">
+
+                <label>Owner Contact Number</label>
+
+                <input
+                    type="tel"
+                    name="contact_number"
+                    value="{{ room.contact_number or '' }}"
+                    maxlength="30"
+                    placeholder="Include country code for WhatsApp"
+                >
+
+            </div>
+
+
+            <div class="field">
+
+                <label>Google Maps Link</label>
+
+                <input
+                    type="url"
+                    name="maps_link"
+                    value="{{ room.maps_link or '' }}"
+                    maxlength="2000"
+                    placeholder="Paste Google Maps link"
+                >
+
+                <small>
+                    Open Google Maps, select the property location,
+                    and copy its share link.
+                </small>
+
+            </div>
+
+
+            <div class="field">
+
+                <label>Description</label>
+
+                <textarea
+                    name="description"
+                    maxlength="3000"
+                    required
+                >{{ room.description }}</textarea>
+
+            </div>
+
+
+            <div class="field">
+
+                <label>Amenities</label>
+
+                {% set current_amenities =
+                    (room.amenities or '').split(', ') %}
+
+                <div class="amenities">
+
+                    {% for amenity in allowed_amenities %}
+
+                        <label>
+
+                            <input
+                                type="checkbox"
+                                name="amenities"
+                                value="{{ amenity }}"
+                                {% if amenity in current_amenities %}
+                                    checked
+                                {% endif %}
+                            >
+
+                            {{ amenity }}
+
+                        </label>
+
+                    {% endfor %}
+
+                </div>
+
+            </div>
+
+
+            <div class="field">
+
+                <label>Replace Room Photo (Optional)</label>
+
+                {% if room.photo %}
+
+                    <p>Current room photo:</p>
+
+                    <img
+                        class="current-photo"
+                        src="{{ url_for('static', filename='uploads/' + room.photo) }}"
+                        alt="Current room photo"
+                    >
+
+                {% else %}
+
+                    <p>No photo uploaded yet.</p>
+
+                {% endif %}
+
+                <input
+                    type="file"
+                    name="photo"
+                    accept=".jpg,.jpeg,.png,.webp"
+                >
+
+                <small>
+                    Leave this empty to keep the current photo.
+                </small>
+
+            </div>
+
+
+            <button type="submit">
+                Save Changes
+            </button>
+
+            <a
+                class="btn cancel"
+                href="{{ url_for('owner_dashboard') }}"
+            >
+                Cancel
+            </a>
+
+        </form>
+
+    </section>
+
+</main>
+
+</body>
+</html>

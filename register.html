@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Register - Ghar Dekho</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+<header>
+    <a class="logo" href="{{ url_for('index') }}">🏠 Ghar Dekho</a>
+    <nav><a href="{{ url_for('index') }}">Home</a></nav>
+</header>
+
+<main class="form-container">
+    <h1>Create an Account</h1>
+    <p>Join Ghar Dekho as an owner or tenant.</p>
+
+    {% for message in get_flashed_messages() %}
+        <p class="notice">{{ message }}</p>
+    {% endfor %}
+
+    <form method="POST" action="{{ url_for('register') }}">
+        <label>Full Name</label>
+        <input name="name" maxlength="100" required>
+
+        <label>Email Address</label>
+        <input type="email" name="email" maxlength="254" required>
+
+        <label>Password (at least 8 characters)</label>
+        <input type="password" name="password" minlength="8" required>
+
+        <label>Register As</label>
+        <select name="role" required>
+            <option value="tenant">Tenant</option>
+            <option value="owner">Property Owner</option>
+        </select>
+
+        <button type="submit">Register</button>
+    </form>
+
+    <p>Already registered?
+        <a href="{{ url_for('login') }}">Login here</a>
+    </p>
+</main>
+
+</body>
+</html>

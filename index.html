@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Ghar Dekho | Find Your Perfect Room</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f5f7fb;
+            color: #222;
+        }
+
+        header {
+            background: #173b70;
+            color: white;
+            padding: 18px 6%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        header h1 {
+            margin: 0;
+        }
+
+        nav {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        nav a {
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .hero {
+            background: #dfeeff;
+            text-align: center;
+            padding: 45px 15px;
+        }
+
+        .hero h2 {
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 30px auto;
+        }
+
+        .search-box {
+            background: white;
+            padding: 22px;
+            border-radius: 12px;
+            box-shadow: 0 3px 12px #00000010;
+            margin-bottom: 30px;
+        }
+
+        .search-form {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 12px;
+        }
+
+        input, select, textarea, button {
+            font: inherit;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 11px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+        }
+
+        button, .btn {
+            display: inline-block;
+            background: #1769aa;
+            color: white;
+            border: none;
+            padding: 10px 14px;
+            border-radius: 6px;
+            text-decoration: none;
+            cursor: pointer;
+            text-align: center;
+        }
+
+        .btn-green {
+            background: #16864b;
+        }
+
+        .btn-orange {
+            background: #e88b24;
+        }
+
+        .btn-red {
+            background: #d94343;
+        }
+
+        .btn-light {
+            background: #edf2f7;
+            color: #173b70;
+        }
+
+        .room-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
+            gap: 22px;
+        }
+
+        .room-card {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 3px 12px #00000010;
+        }
+
+        .room-photo {
+            width: 100%;
+            height: 210px;
+            object-fit: cover;
+            background: #e5e7eb;
+        }
+
+        .room-content {
+            padding: 18px;
+        }
+
+        .rent {
+            color: #16864b;
+            font-size: 23px;
+            font-weight: bold;
+        }
+
+        .room-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 15px;
+        }
+
+        .room-actions .btn,
+        .room-actions button {
+            flex: 1 1 120px;
+        }
+
+        .message {
+            padding: 12px;
+            background: #e1f7e8;
+            margin-bottom: 12px;
+            border-radius: 6px;
+        }
+
+        footer {
+            text-align: center;
+            padding: 25px;
+            margin-top: 50px;
+            background: #173b70;
+            color: white;
+        }
+
+        @media (max-width: 600px) {
+            header {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+
+            .hero h2 {
+                font-size: 25px;
+            }
+
+            .container {
+                width: 94%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<header>
+    <h1>🏠 Ghar Dekho</h1>
+
+    <nav>
+        <a href="{{ url_for('index') }}">Home</a>
+
+        {% if current_user %}
+            {% if current_user.role == 'owner' %}
+                <a href="{{ url_for('owner_dashboard') }}">Owner Dashboard</a>
+            {% else %}
+                <a href="{{ url_for('tenant_dashboard') }}">My Dashboard</a>
+            {% endif %}
+
+            <a href="{{ url_for('logout') }}">Logout</a>
+        {% else %}
+            <a href="{{ url_for('login') }}">Login</a>
+            <a href="{{ url_for('register') }}">Register</a>
+        {% endif %}
+
+        <a href="{{ url_for('contact') }}">Contact Us</a>
+    </nav>
+</header>
+
+<section class="hero">
+    <h2>Find Your Perfect Room</h2>
+    <p>Discover rooms, flats, PGs and hostels near you.</p>
+</section>
+
+<main class="container">
+
+    {% with messages = get_flashed_messages() %}
+        {% for message in messages %}
+            <div class="message">{{ message }}</div>
+        {% endfor %}
+    {% endwith %}
+
+    {% if not contact_only|default(false) %}
+
+        <section class="search-box">
+            <h2>Search Properties</h2>
+
+            <form method="GET" action="{{ url_for('index') }}"
+                  class="search-form">
+
+                <input
+                    type="text"
+                    name="location"
+                    placeholder="Enter location"
+                    value="{{ location }}"
+                >
+
+                <select name="room_type">
+                    <option value="">All Room Types</option>
+
+                    {% for type in [
+                        'Single Room', '1 BHK', '2 BHK',
+                        '3 BHK', 'PG', 'Hostel'
+                    ] %}
+                        <option value="{{ type }}"
+                            {% if room_type == type %}selected{% endif %}>
+                            {{ type }}
+                        </option>
+                    {% endfor %}
+                </select>
+
+                <input
+                    type="number"
+                    name="min_rent"
+                    placeholder="Minimum rent"
+                    min="0"
+                    value="{{ min_rent }}"
+                >
+
+                <input
+                    type="number"
+                    name="max_rent"
+                    placeholder="Maximum rent"
+                    min="0"
+                    value="{{ max_rent }}"
+                >
+
+                <button type="submit">Search Rooms</button>
+            </form>
+        </section>
+
+        <h2>Available Rooms</h2>
+
+        {% if rooms %}
+
+            <div class="room-grid">
+
+                {% for room in rooms %}
+
+                    <article class="room-card">
+
+                        {% if room.photo %}
+                            <img
+                                class="room-photo"
+                                src="{{ url_for('static', filename='uploads/' + room.photo) }}"
+                                alt="{{ room.title }}"
+                                loading="lazy"
+                            >
+                        {% else %}
+                            <div class="room-photo"
+                                 style="display:flex;align-items:center;justify-content:center;">
+                                🏠 No Photo Available
+                            </div>
+                        {% endif %}
+
+                        <div class="room-content">
+
+                            <h3>{{ room.title }}</h3>
+
+                            <p>{{ room.room_type }}</p>
+
+                            <p>
+                                📍 {{ room.location }}
+                            </p>
+
+                            <p>
+                                {{ room.address }}
+                            </p>
+
+                            <p class="rent">
+                                ₹{{ "{:,}".format(room.rent) }}/month
+                            </p>
+
+                            <p>
+                                Deposit: ₹{{ "{:,}".format(room.deposit) }}
+                            </p>
+
+                            <p>
+                                <strong>Owner:</strong>
+                                {{ room.owner_name }}
+                            </p>
+
+                            <p>{{ room.description }}</p>
+
+                            {% if room.amenities %}
+                                <p>
+                                    <strong>Amenities:</strong>
+                                    {{ room.amenities }}
+                                </p>
+                            {% endif %}
+
+                            <div class="room-actions">
+
+                                {% if room.contact_number %}
+                                    <a
+                                        class="btn btn-green"
+                                        href="tel:{{ room.contact_number }}"
+                                    >
+                                        📞 Call Owner
+                                    </a>
+
+                                    {% set wa_number = room.contact_number
+                                        |replace('+', '')
+                                        |replace(' ', '')
+                                        |replace('-', '')
+                                        |replace('(', '')
+                                        |replace(')', '') %}
+
+                                    <a
+                                        class="btn btn-green"
+                                        href="https://wa.me/{{ wa_number }}"
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                    >
+                                        WhatsApp
+                                    </a>
+                                {% endif %}
+
+                                {% if room.maps_link %}
+                                    <a
+                                        class="btn btn-orange"
+                                        href="{{ room.maps_link }}"
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                    >
+                                        📍 View on Map
+                                    </a>
+                                {% else %}
+                                    <a
+                                        class="btn btn-orange"
+                                        href="https://www.google.com/maps/search/?api=1&query={{ (room.address ~ ', ' ~ room.location)|urlencode }}"
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                    >
+                                        📍 Search on Map
+                                    </a>
+                                {% endif %}
+
+                            </div>
+
+                            <div class="room-actions">
+
+                                {% if current_user
+                                      and current_user.role == 'tenant' %}
+
+                                    <form
+                                        method="POST"
+                                        action="{{ url_for('favourite', room_id=room.id) }}"
+                                    >
+                                        <button
+                                            type="submit"
+                                            class="btn btn-light"
+                                        >
+                                            {% if room.id in saved %}
+                                                ❤️ Saved
+                                            {% else %}
+                                                🤍 Favourite
+                                            {% endif %}
+                                        </button>
+                                    </form>
+
+                                    <form
+                                        method="POST"
+                                        action="{{ url_for('enquire', room_id=room.id) }}"
+                                    >
+                                        <button type="submit">
+                                            Send Enquiry
+                                        </button>
+                                    </form>
+
+                                {% elif not current_user %}
+
+                                    <a
+                                        class="btn"
+                                        href="{{ url_for('login') }}"
+                                    >
+                                        Login to Enquire
+                                    </a>
+
+                                {% endif %}
+
+                            </div>
+
+                        </div>
+                    </article>
+
+                {% endfor %}
+
+            </div>
+
+        {% else %}
+
+            <p>No rooms found. Try changing your search filters.</p>
+
+        {% endif %}
+
+    {% else %}
+
+        <section class="search-box">
+            <h2>Contact Us</h2>
+
+            <form method="POST" action="{{ url_for('contact') }}">
+
+                <label>Name</label>
+                <input name="name" maxlength="100" required>
+
+                <br><br>
+
+                <label>Email</label>
+                <input type="email" name="email" maxlength="254" required>
+
+                <br><br>
+
+                <label>Message</label>
+                <textarea name="message" maxlength="3000" required></textarea>
+
+                <br><br>
+
+                <button type="submit">Send Message</button>
+            </form>
+        </section>
+
+    {% endif %}
+
+</main>
+
+<footer>
+    <p>© 2026 Ghar Dekho | Find a place to call home.</p>
+</footer>
+
+</body>
+</html>

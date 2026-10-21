@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Tenant Dashboard - Ghar Dekho</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+<header>
+    <a class="logo" href="{{ url_for('index') }}">🏠 Ghar Dekho</a>
+    <nav>
+        <a href="{{ url_for('index') }}">Find Rooms</a>
+        <a href="{{ url_for('logout') }}">Logout</a>
+    </nav>
+</header>
+
+<main class="container">
+    <h1>Tenant Dashboard</h1>
+    <p>Welcome, {{ current_user.name }}!</p>
+
+    {% for message in get_flashed_messages() %}
+        <p class="notice">{{ message }}</p>
+    {% endfor %}
+
+    <h2>My Favourite Rooms</h2>
+
+    <div class="grid">
+        {% for room in favourites %}
+            <article class="card">
+                {% if room.photo %}
+                    <img src="{{ url_for('static', filename='uploads/' ~ room.photo) }}"
+                         alt="Room photo">
+                {% endif %}
+
+                <div class="card-content">
+                    <h3>{{ room.title }}</h3>
+                    <p>{{ room.location }}</p>
+                    <p>Type: {{ room.room_type }}</p>
+                    <p class="price">₹{{ room.rent }}/month</p>
+                    <p>Owner: {{ room.owner_name }}</p>
+
+                    <form method="POST"
+                          action="{{ url_for('favourite', room_id=room.id) }}">
+                        <button type="submit">Remove Favourite</button>
+                    </form>
+                </div>
+            </article>
+        {% else %}
+            <p>You have not saved any favourite rooms yet.</p>
+        {% endfor %}
+    </div>
+
+    <h2>My Enquiries</h2>
+
+    {% for enquiry in enquiries %}
+        <div class="panel">
+            <h3>{{ enquiry.title }}</h3>
+            <p>Your message: {{ enquiry.message }}</p>
+            <p>Status: <strong>{{ enquiry.status }}</strong></p>
+        </div>
+    {% else %}
+        <p>You have not sent any enquiries yet.</p>
+    {% endfor %}
+
+    <a class="button" href="{{ url_for('index') }}">Search More Rooms</a>
+</main>
+
+</body>
+</html>
